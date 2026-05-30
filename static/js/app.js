@@ -213,6 +213,8 @@ const app = (() => {
     document.querySelectorAll(".nav-theory-item, .nav-question").forEach(e =>
       e.classList.remove("active")
     );
+    // Always scroll main content area back to top when switching views
+    document.getElementById("main").scrollTop = 0;
   }
 
   function showHome() { showView("view-home"); }
@@ -488,11 +490,23 @@ const app = (() => {
 
   function copySolution() {
     const sql = document.getElementById("solution-sql-display").textContent;
-    navigator.clipboard.writeText(sql).then(() => {
-      const btn = document.getElementById("btn-copy-solution");
-      btn.textContent = "Copied!";
-      setTimeout(() => (btn.textContent = "Copy"), 1500);
-    });
+    if (!sql) return;
+
+    // Paste into editor
+    editor.setValue(sql);
+    editor.focus();
+
+    // Also copy to clipboard
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(sql).catch(() => {});
+    }
+
+    const btn = document.getElementById("btn-copy-solution");
+    btn.textContent = "✓ In Editor";
+    setTimeout(() => (btn.textContent = "Copy"), 2000);
+
+    // Smooth-scroll up so user can see the editor
+    document.getElementById("main").scrollTop = 0;
   }
 
   function resetEditor() {
