@@ -18,159 +18,181 @@
 </head>
 <body>
 
-<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
-<aside id="sidebar">
-  <div id="sidebar-header">
-    <span class="logo-icon">🗄️</span>
-    <span class="logo-text">SQL Practice</span>
+<!-- ══════════════════════════════════════════════════════
+     PRACTICE SECTION  (sidebar + editor)
+══════════════════════════════════════════════════════════ -->
+<div id="practice-section">
+
+  <aside id="sidebar">
+    <div id="sidebar-header">
+      <span class="logo-icon">🗄️</span>
+      <span class="logo-text">SQL Practice</span>
+    </div>
+
+    <div id="sidebar-search-wrap">
+      <input id="sidebar-search" type="text" placeholder="Search questions…" autocomplete="off" />
+    </div>
+
+    <nav id="sidebar-nav"><!-- Populated by JS --></nav>
+
+    <div id="sidebar-footer">
+      <span id="question-counter">Loading…</span>
+    </div>
+  </aside>
+
+  <main id="practice-main">
+
+    <!-- Home -->
+    <section id="view-home" class="pview active">
+      <div class="home-hero">
+        <h1>Welcome to SQL Practice</h1>
+        <p class="home-sub">69 hands-on questions &bull; 8 theory guides &bull; Live query execution</p>
+        <div class="home-cards">
+          <div class="home-card" onclick="app.showFirstQuestion()">
+            <div class="card-icon">📝</div>
+            <div class="card-label">Start Practicing</div>
+            <div class="card-desc">69 questions across 16 categories</div>
+          </div>
+          <div class="home-card" onclick="app.openTheory()">
+            <div class="card-icon">📚</div>
+            <div class="card-label">Theory Reference</div>
+            <div class="card-desc">ACID, Indexes, Normalization &amp; more</div>
+          </div>
+          <div class="home-card" onclick="app.showTableViewer()">
+            <div class="card-icon">🗂️</div>
+            <div class="card-label">Browse Tables</div>
+            <div class="card-desc">Explore the sample database schema</div>
+          </div>
+        </div>
+        <div class="home-db-info">
+          <h3>Sample Database</h3>
+          <div class="schema-pills">
+            <span class="schema-pill" onclick="app.showTableModal('employees')">employees</span>
+            <span class="schema-pill" onclick="app.showTableModal('departments')">departments</span>
+            <span class="schema-pill" onclick="app.showTableModal('customers')">customers</span>
+            <span class="schema-pill" onclick="app.showTableModal('orders')">orders</span>
+            <span class="schema-pill" onclick="app.showTableModal('products')">products</span>
+            <span class="schema-pill" onclick="app.showTableModal('sales')">sales</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Question -->
+    <section id="view-question" class="pview">
+      <div id="question-header">
+        <div id="question-meta">
+          <span id="question-category-badge"></span>
+          <span id="question-number"></span>
+        </div>
+        <h2 id="question-title"></h2>
+        <p id="question-description"></p>
+        <div id="question-tables">
+          <span class="tables-label">Tables used:</span>
+          <span id="question-tables-list"></span>
+        </div>
+      </div>
+
+      <div id="editor-wrap">
+        <div id="editor-toolbar">
+          <span class="editor-label">SQL Editor</span>
+          <div class="editor-shortcuts">Ctrl+Enter to Run</div>
+        </div>
+        <textarea id="sql-editor"></textarea>
+      </div>
+
+      <div id="action-bar">
+        <button id="btn-run" class="btn btn-primary">&#9654; Run</button>
+        <button id="btn-solution" class="btn btn-secondary">&#128161; Solution</button>
+        <button id="btn-reset" class="btn btn-ghost">&#8635; Reset</button>
+      </div>
+
+      <div id="results-panel">
+        <div id="results-header">
+          <span id="results-label">Results</span>
+          <span id="results-count"></span>
+        </div>
+        <div id="results-body">
+          <div id="results-placeholder" class="placeholder-msg">
+            Write a query and click <strong>Run</strong> to see results.
+          </div>
+          <div id="results-error" class="error-msg hidden"></div>
+          <div id="results-table-wrap" class="hidden">
+            <table id="results-table"></table>
+          </div>
+        </div>
+      </div>
+
+      <div id="solution-panel" class="hidden">
+        <div class="solution-header">
+          <span>Solution</span>
+          <button id="btn-close-solution" class="btn-icon" title="Close">&#x2715;</button>
+        </div>
+        <div id="solution-sql-wrap">
+          <div class="solution-sub-header">
+            SQL
+            <button id="btn-copy-solution" class="btn-copy" title="Copy SQL">Copy</button>
+          </div>
+          <pre id="solution-sql-display"></pre>
+        </div>
+        <div id="solution-explanation-wrap">
+          <div class="solution-sub-header">Explanation</div>
+          <div id="solution-explanation"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Table Browser -->
+    <section id="view-tables" class="pview">
+      <div class="page-header">
+        <h2>Database Schema</h2>
+        <p>Browse all tables in the practice database.</p>
+      </div>
+      <div id="table-browser-tabs" class="tab-bar"></div>
+      <div id="table-browser-content"></div>
+    </section>
+
+  </main>
+</div><!-- /#practice-section -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     THEORY SECTION  (full-screen, completely separate)
+══════════════════════════════════════════════════════════ -->
+<div id="theory-section" class="hidden">
+
+  <div id="theory-topbar">
+    <button id="btn-back-to-practice">
+      &#8592; Back to Practice
+    </button>
+    <span id="theory-topbar-title">Theory Reference</span>
   </div>
 
-  <div id="sidebar-search-wrap">
-    <input id="sidebar-search" type="text" placeholder="Search questions…" autocomplete="off" />
+  <div id="theory-body">
+
+    <!-- Left: topic list -->
+    <nav id="theory-nav">
+      <div class="theory-nav-header">Topics</div>
+      <div id="theory-nav-list"><!-- Populated by JS --></div>
+    </nav>
+
+    <!-- Right: content -->
+    <div id="theory-content-area">
+      <!-- Default: card grid -->
+      <div id="theory-home-panel">
+        <h2>Theory Reference</h2>
+        <p>Select a topic from the left to start reading.</p>
+        <div id="theory-cards-grid"></div>
+      </div>
+      <!-- Detail -->
+      <div id="theory-detail-panel" class="hidden">
+        <div id="theory-detail-content" class="theory-content"></div>
+      </div>
+    </div>
+
   </div>
+</div><!-- /#theory-section -->
 
-  <nav id="sidebar-nav">
-    <!-- Populated by JS -->
-  </nav>
-
-  <div id="sidebar-footer">
-    <span id="question-counter">Loading…</span>
-  </div>
-</aside>
-
-<!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
-<main id="main">
-
-  <!-- ── Welcome / Home ── -->
-  <section id="view-home" class="view active">
-    <div class="home-hero">
-      <h1>Welcome to SQL Practice</h1>
-      <p class="home-sub">69 hands-on questions &bull; 8 theory guides &bull; Live query execution</p>
-      <div class="home-cards">
-        <div class="home-card" onclick="app.showFirstQuestion()">
-          <div class="card-icon">📝</div>
-          <div class="card-label">Start Practicing</div>
-          <div class="card-desc">69 questions across 16 categories</div>
-        </div>
-        <div class="home-card" onclick="app.showTheoryList()">
-          <div class="card-icon">📚</div>
-          <div class="card-label">Theory Reference</div>
-          <div class="card-desc">ACID, Indexes, Normalization &amp; more</div>
-        </div>
-        <div class="home-card" onclick="app.showTableViewer()">
-          <div class="card-icon">🗂️</div>
-          <div class="card-label">Browse Tables</div>
-          <div class="card-desc">Explore the sample database schema</div>
-        </div>
-      </div>
-      <div class="home-db-info">
-        <h3>Sample Database</h3>
-        <div class="schema-pills">
-          <span class="schema-pill" onclick="app.showTableModal('employees')">employees</span>
-          <span class="schema-pill" onclick="app.showTableModal('departments')">departments</span>
-          <span class="schema-pill" onclick="app.showTableModal('customers')">customers</span>
-          <span class="schema-pill" onclick="app.showTableModal('orders')">orders</span>
-          <span class="schema-pill" onclick="app.showTableModal('products')">products</span>
-          <span class="schema-pill" onclick="app.showTableModal('sales')">sales</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Practice Question ── -->
-  <section id="view-question" class="view">
-
-    <div id="question-header">
-      <div id="question-meta">
-        <span id="question-category-badge"></span>
-        <span id="question-number"></span>
-      </div>
-      <h2 id="question-title"></h2>
-      <p id="question-description"></p>
-      <div id="question-tables">
-        <span class="tables-label">Tables used:</span>
-        <span id="question-tables-list"></span>
-      </div>
-    </div>
-
-    <div id="editor-wrap">
-      <div id="editor-toolbar">
-        <span class="editor-label">SQL Editor</span>
-        <div class="editor-shortcuts">Ctrl+Enter to Run</div>
-      </div>
-      <textarea id="sql-editor"></textarea>
-    </div>
-
-    <div id="action-bar">
-      <button id="btn-run" class="btn btn-primary">&#9654; Run</button>
-      <button id="btn-solution" class="btn btn-secondary">&#128161; Solution</button>
-      <button id="btn-reset" class="btn btn-ghost">&#8635; Reset</button>
-    </div>
-
-    <!-- Results -->
-    <div id="results-panel">
-      <div id="results-header">
-        <span id="results-label">Results</span>
-        <span id="results-count"></span>
-      </div>
-      <div id="results-body">
-        <div id="results-placeholder" class="placeholder-msg">
-          Write a query and click <strong>Run</strong> to see results.
-        </div>
-        <div id="results-error" class="error-msg hidden"></div>
-        <div id="results-table-wrap" class="hidden">
-          <table id="results-table"></table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Solution panel (hidden by default) -->
-    <div id="solution-panel" class="hidden">
-      <div class="solution-header">
-        <span>Solution</span>
-        <button id="btn-close-solution" class="btn-icon" title="Close">&#x2715;</button>
-      </div>
-      <div id="solution-sql-wrap">
-        <div class="solution-sub-header">
-          SQL
-          <button id="btn-copy-solution" class="btn-copy" title="Copy SQL">Copy</button>
-        </div>
-        <pre id="solution-sql-display"></pre>
-      </div>
-      <div id="solution-explanation-wrap">
-        <div class="solution-sub-header">Explanation</div>
-        <div id="solution-explanation"></div>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ── Theory List ── -->
-  <section id="view-theory-list" class="view">
-    <div class="page-header">
-      <h2>Theory Reference</h2>
-      <p>Conceptual guides to SQL internals and best practices.</p>
-    </div>
-    <div id="theory-cards-grid"></div>
-  </section>
-
-  <!-- ── Theory Detail ── -->
-  <section id="view-theory-detail" class="view">
-    <button class="back-btn" onclick="app.showTheoryList()">&#8592; Back to Theory</button>
-    <div id="theory-detail-content" class="theory-content"></div>
-  </section>
-
-  <!-- ── Table Browser ── -->
-  <section id="view-tables" class="view">
-    <div class="page-header">
-      <h2>Database Schema</h2>
-      <p>Browse all tables in the practice database.</p>
-    </div>
-    <div id="table-browser-tabs" class="tab-bar"></div>
-    <div id="table-browser-content"></div>
-  </section>
-
-</main>
 
 <!-- ═══════════════════════ TABLE MODAL ═══════════════════════ -->
 <div id="table-modal" class="modal hidden">

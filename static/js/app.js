@@ -6,7 +6,7 @@
 
 const app = (() => {
 
-  // ── State ──────────────────────────────────────────────────────
+  // ── State ─────────────────────────────────────────────────────
   let allQuestions    = [];
   let allCategories   = [];
   let allTheory       = [];
@@ -16,7 +16,7 @@ const app = (() => {
   let editor          = null;
   let solutionVisible = false;
 
-  // ── Loading overlay ────────────────────────────────────────────
+  // ── Loading overlay ───────────────────────────────────────────
   function showLoader(msg) {
     let overlay = document.getElementById("app-loader");
     if (!overlay) {
@@ -53,7 +53,7 @@ const app = (() => {
     if (sub)   sub.style.display   = "none";
   }
 
-  // ── Fetch with retry (handles cold starts) ─────────────────────
+  // ── Fetch with retry ──────────────────────────────────────────
   async function fetchWithRetry(url, options = {}, retries = 5, delayMs = 4000) {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
@@ -68,12 +68,10 @@ const app = (() => {
     }
   }
 
-  // ── Init ───────────────────────────────────────────────────────
+  // ── Init ──────────────────────────────────────────────────────
   async function init() {
-    // Wire up buttons immediately — never behind an async gate
     attachGlobalKeys();
     initEditor();
-
     showLoader("Connecting to server…");
 
     try {
@@ -93,6 +91,7 @@ const app = (() => {
 
       hideLoader();
       buildSidebar();
+      buildTheoryNav();
       showHome();
 
     } catch (err) {
@@ -101,7 +100,7 @@ const app = (() => {
     }
   }
 
-  // ── CodeMirror ─────────────────────────────────────────────────
+  // ── CodeMirror ────────────────────────────────────────────────
   function initEditor() {
     editor = CodeMirror.fromTextArea(document.getElementById("sql-editor"), {
       mode: "text/x-sql",
@@ -121,12 +120,25 @@ const app = (() => {
     });
   }
 
-  // ── Sidebar ─────────────────────────────────────────────────────
+  // ── Practice sidebar ──────────────────────────────────────────
   function buildSidebar() {
     const nav = document.getElementById("sidebar-nav");
     nav.innerHTML = "";
 
-    const practiceHeader = el("div", "nav-section-header", "Practice");
+    // Theory button at top
+    const theoryBtn = el("div", "nav-theory-btn");
+    theoryBtn.innerHTML = `<span>📚</span> Theory Reference`;
+    theoryBtn.addEventListener("click", openTheory);
+    nav.appendChild(theoryBtn);
+
+    // Tables button
+    const tablesBtn = el("div", "nav-tables-btn");
+    tablesBtn.innerHTML = `<span>🗂️</span> Browse Tables`;
+    tablesBtn.addEventListener("click", showTableViewer);
+    nav.appendChild(tablesBtn);
+
+    const practiceHeader = el("div", "nav-section-header", "Practice Questions");
+    practiceHeader.style.marginTop = "10px";
     nav.appendChild(practiceHeader);
 
     allCategories.forEach(cat => {
@@ -157,27 +169,6 @@ const app = (() => {
       });
     });
 
-    const theoryHeader = el("div", "nav-section-header", "Theory");
-    theoryHeader.style.marginTop = "12px";
-    nav.appendChild(theoryHeader);
-
-    allTheory.forEach(page => {
-      const row = el("div", "nav-theory-item");
-      row.dataset.slug = page.slug;
-      row.innerHTML = `<span class="th-icon">${page.icon}</span>${page.title}`;
-      row.addEventListener("click", () => showTheoryDetail(page.slug));
-      nav.appendChild(row);
-    });
-
-    const tablesHeader = el("div", "nav-section-header", "Database");
-    tablesHeader.style.marginTop = "12px";
-    nav.appendChild(tablesHeader);
-
-    const tablesRow = el("div", "nav-theory-item");
-    tablesRow.innerHTML = `<span class="th-icon">🗂️</span>Browse Tables`;
-    tablesRow.addEventListener("click", showTableViewer);
-    nav.appendChild(tablesRow);
-
     document.getElementById("sidebar-search").addEventListener("input", function () {
       filterSidebar(this.value.trim().toLowerCase());
     });
@@ -206,29 +197,24 @@ const app = (() => {
     });
   }
 
-  // ── View management ─────────────────────────────────────────────
-  function showView(id) {
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-    document.querySelectorAll(".nav-theory-item, .nav-question").forEach(e =>
-      e.classList.remove("active")
-    );
-    // Always scroll main content area back to top when switching views
-    document.getElementById("main").scrollTop = 0;
-  }
+  // ── Theory nav (inside theory section) ───────────────────────
+  function buildTheoryNav() {
+    const navList = document.getElementById("theory-nav-list");
+    navList.innerHTML = "";
 
-  function showHome() { showView("view-home"); }
-
-  function showFirstQuestion() {
-    if (allQuestions.length) loadQuestion(allQuestions[0].id);
-  }
-
-  function showTheoryList() {
-    showView("view-theory-list");
+    // Build cards grid for home panel
     const grid = document.getElementById("theory-cards-grid");
-    if (grid.children.length) return;
     grid.innerHTML = "";
+
     allTheory.forEach(page => {
+      // Left nav item
+      const item = el("div", "theory-nav-item");
+      item.dataset.slug = page.slug;
+      item.innerHTML = `<span class="tn-icon">${page.icon}</span>${page.title}`;
+      item.addEventListener("click", () => showTheoryDetail(page.slug));
+      navList.appendChild(item);
+
+      // Card in home panel
       const card = el("div", "theory-card");
       card.innerHTML = `
         <div class="theory-card-icon">${page.icon}</div>
@@ -240,26 +226,72 @@ const app = (() => {
     });
   }
 
+  // ── Practice view management ──────────────────────────────────
+  function showPracticeView(id) {
+    document.querySelectorAll(".pview").forEach(v => v.classList.remove("active"));
+    const target = document.getElementById(id);
+    if (target) target.classList.add("active");
+    document.querySelectorAll(".nav-question").forEach(e => e.classList.remove("active"));
+    document.getElementById("practice-main").scrollTop = 0;
+  }
+
+  function showHome() { showPracticeView("view-home"); }
+
+  function showFirstQuestion() {
+    if (allQuestions.length) loadQuestion(allQuestions[0].id);
+  }
+
+  function showTableViewer() {
+    showPracticeView("view-tables");
+    renderTableBrowser();
+  }
+
+  // ── Theory section (full-screen overlay) ─────────────────────
+  function openTheory() {
+    document.getElementById("theory-section").classList.remove("hidden");
+    // Show home panel by default (deselect any active topic)
+    document.getElementById("theory-home-panel").classList.remove("hidden");
+    document.getElementById("theory-detail-panel").classList.add("hidden");
+    document.querySelectorAll(".theory-nav-item").forEach(e => e.classList.remove("active"));
+    document.getElementById("theory-topbar-title").textContent = "Theory Reference";
+  }
+
+  function closeTheory() {
+    document.getElementById("theory-section").classList.add("hidden");
+  }
+
   async function showTheoryDetail(slug) {
-    showView("view-theory-detail");
-    document.querySelectorAll(".nav-theory-item").forEach(e => {
+    // Mark active nav item
+    document.querySelectorAll(".theory-nav-item").forEach(e => {
       e.classList.toggle("active", e.dataset.slug === slug);
     });
+
+    // Switch to detail panel
+    document.getElementById("theory-home-panel").classList.add("hidden");
+    const detailPanel = document.getElementById("theory-detail-panel");
+    detailPanel.classList.remove("hidden");
+
     const content = document.getElementById("theory-detail-content");
     content.innerHTML = '<div class="placeholder-msg"><span class="spinner"></span> Loading…</div>';
+
+    // Update topbar title
+    const page = allTheory.find(p => p.slug === slug);
+    if (page) {
+      document.getElementById("theory-topbar-title").textContent = page.title;
+    }
+
+    // Scroll content area to top
+    document.getElementById("theory-content-area").scrollTop = 0;
+
     try {
-      const page = await fetchWithRetry(`/api/theory/${slug}`, {}, 3, 2000);
-      content.innerHTML = page.content;
+      const data = await fetchWithRetry(`/api/theory/${slug}`, {}, 3, 2000);
+      content.innerHTML = data.content;
     } catch {
       content.innerHTML = '<div class="placeholder-msg" style="color:var(--red)">Failed to load. Please refresh.</div>';
     }
   }
 
-  function showTableViewer() {
-    showView("view-tables");
-    renderTableBrowser();
-  }
-
+  // ── Table browser ─────────────────────────────────────────────
   function renderTableBrowser() {
     const tabBar  = document.getElementById("table-browser-tabs");
     const content = document.getElementById("table-browser-content");
@@ -312,19 +344,18 @@ const app = (() => {
     data.sample_rows.forEach(row => {
       sampleHtml +=
         "<tr>" +
-        row
-          .map(
-            v =>
-              `<td>${v === null ? '<span style="color:var(--text3);font-style:italic">NULL</span>' : escHtml(String(v))}</td>`
-          )
-          .join("") +
+        row.map(v =>
+          `<td>${v === null
+            ? '<span style="color:var(--text3);font-style:italic">NULL</span>'
+            : escHtml(String(v))}</td>`
+        ).join("") +
         "</tr>";
     });
     sampleHtml += "</tbody></table></div></div>";
     return schemaHtml + sampleHtml;
   }
 
-  // ── Question loading ─────────────────────────────────────────────
+  // ── Question loading ──────────────────────────────────────────
   async function loadQuestion(qid) {
     currentQid      = qid;
     solutionVisible = false;
@@ -369,15 +400,15 @@ const app = (() => {
 
       editor.setValue(q.starter_sql || "SELECT ");
       editor.focus();
-      showView("view-question");
+      showPracticeView("view-question");
 
     } catch {
       showError("Failed to load question. Please refresh.");
-      showView("view-question");
+      showPracticeView("view-question");
     }
   }
 
-  // ── Run query ───────────────────────────────────────────────────
+  // ── Run query ─────────────────────────────────────────────────
   async function runQuery() {
     const sql = editor.getValue().trim();
     if (!sql) return;
@@ -468,7 +499,7 @@ const app = (() => {
     document.getElementById("results-count").textContent = label;
   }
 
-  // ── Solution ────────────────────────────────────────────────────
+  // ── Solution ──────────────────────────────────────────────────
   function toggleSolution() {
     solutionVisible ? hideSolution() : showSolution();
   }
@@ -492,11 +523,9 @@ const app = (() => {
     const sql = document.getElementById("solution-sql-display").textContent;
     if (!sql) return;
 
-    // Paste into editor
     editor.setValue(sql);
     editor.focus();
 
-    // Also copy to clipboard
     if (navigator.clipboard) {
       navigator.clipboard.writeText(sql).catch(() => {});
     }
@@ -505,8 +534,7 @@ const app = (() => {
     btn.textContent = "✓ In Editor";
     setTimeout(() => (btn.textContent = "Copy"), 2000);
 
-    // Smooth-scroll up so user can see the editor
-    document.getElementById("main").scrollTop = 0;
+    document.getElementById("practice-main").scrollTop = 0;
   }
 
   function resetEditor() {
@@ -517,7 +545,7 @@ const app = (() => {
     editor.focus();
   }
 
-  // ── Table modal ─────────────────────────────────────────────────
+  // ── Table modal ───────────────────────────────────────────────
   function showTableModal(tableName) {
     if (!tablesData[tableName]) return;
     const data = tablesData[tableName];
@@ -543,12 +571,11 @@ const app = (() => {
     data.sample_rows.forEach(row => {
       sHtml +=
         "<tr>" +
-        row
-          .map(
-            v =>
-              `<td>${v === null ? '<i style="color:var(--text3)">NULL</i>' : escHtml(String(v))}</td>`
-          )
-          .join("") +
+        row.map(v =>
+          `<td>${v === null
+            ? '<i style="color:var(--text3)">NULL</i>'
+            : escHtml(String(v))}</td>`
+        ).join("") +
         "</tr>";
     });
     sHtml += "</tbody></table></div>";
@@ -573,19 +600,23 @@ const app = (() => {
     document.getElementById("modal-sample").classList.toggle("hidden", tab !== "sample");
   }
 
-  // ── Button listeners — wired immediately, not behind async ──────
+  // ── Global keyboard listeners ─────────────────────────────────
   function attachGlobalKeys() {
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") closeTableModal();
+      if (e.key === "Escape") {
+        closeTableModal();
+        closeTheory();
+      }
     });
     document.getElementById("btn-run").addEventListener("click", runQuery);
     document.getElementById("btn-solution").addEventListener("click", toggleSolution);
     document.getElementById("btn-reset").addEventListener("click", resetEditor);
     document.getElementById("btn-close-solution").addEventListener("click", hideSolution);
     document.getElementById("btn-copy-solution").addEventListener("click", copySolution);
+    document.getElementById("btn-back-to-practice").addEventListener("click", closeTheory);
   }
 
-  // ── Utilities ───────────────────────────────────────────────────
+  // ── Utilities ─────────────────────────────────────────────────
   function el(tag, cls, text) {
     const e = document.createElement(tag);
     if (cls)  e.className   = cls;
@@ -601,13 +632,16 @@ const app = (() => {
     init,
     showHome,
     showFirstQuestion,
-    showTheoryList,
+    openTheory,
+    closeTheory,
     showTheoryDetail,
     showTableViewer,
     showTableModal,
     closeTableModal,
     switchModalTab,
     loadQuestion,
+    // alias used in HTML onclick
+    closTheory: closeTheory,
   };
 })();
 
