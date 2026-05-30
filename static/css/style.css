@@ -542,9 +542,50 @@ body { display: flex; overflow: hidden; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #4a545e; }
 
+/* ── Loading overlay ─────────────────────────────────────────────────────── */
+#app-loader {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 17, 23, 0.92);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loader-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 40px;
+  text-align: center;
+  max-width: 360px;
+  box-shadow: var(--shadow);
+}
+.loader-spinner {
+  width: 28px;
+  height: 28px;
+  border-width: 3px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+#loader-msg {
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.loader-sub {
+  font-size: .78rem;
+  color: var(--text3);
+  line-height: 1.55;
+  margin: 0;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 700px) {
   #sidebar { display: none; }
   .view { padding: 20px 16px; }
   #view-question { padding: 16px; }
+  .home-cards { flex-direction: column; }
+  .home-card { width: 100%; }
 }
