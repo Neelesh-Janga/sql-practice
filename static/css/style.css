@@ -30,6 +30,7 @@
   --transition:  0.15s ease;
 }
 
+:root { --footer-h: 36px; }
 html, body { height: 100%; font-family: var(--font-sans); background: var(--bg); color: var(--text); overflow: hidden; }
 
 a { color: var(--accent); text-decoration: none; }
@@ -44,7 +45,7 @@ pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 ══════════════════════════════════════════════ */
 #practice-section {
   display: flex;
-  height: 100vh;
+  height: calc(100vh - var(--footer-h));
   width: 100%;
   overflow: hidden;
 }
@@ -57,7 +58,7 @@ pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - var(--footer-h));
   overflow: hidden;
 }
 
@@ -178,27 +179,12 @@ pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 .nav-tables-btn:hover { background: var(--bg4); color: var(--text); }
 
 #sidebar-footer {
-  padding: 8px 14px 10px;
+  padding: 8px 14px;
   border-top: 1px solid var(--border);
   font-size: .72rem;
   color: var(--text3);
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
-
-.sidebar-credit {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--text3);
-  font-size: .72rem;
-  text-decoration: none;
-  transition: color var(--transition);
-}
-.sidebar-credit:hover { color: #0a66c2; }
-.sidebar-credit .li-icon { width: 11px; height: 11px; flex-shrink: 0; }
 
 /* ── Practice views ──────────────────────────────────────────────────────── */
 .pview { display: none; }
@@ -240,33 +226,6 @@ pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 }
 .schema-pill:hover { border-color: var(--green); background: var(--green-bg); }
 
-.home-credits {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 32px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-  font-size: .82rem;
-  color: var(--text3);
-}
-.credits-label { color: var(--text3); }
-.credits-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #0a66c2;
-  font-weight: 600;
-  font-size: .82rem;
-  text-decoration: none;
-  background: #0d1f33;
-  border: 1px solid #1a3a5c;
-  padding: 4px 10px;
-  border-radius: 20px;
-  transition: background var(--transition), border-color var(--transition);
-}
-.credits-link:hover { background: #122840; border-color: #0a66c2; color: #1e85d4; }
-.credits-link .li-icon { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* ── Question view ───────────────────────────────────────────────────────── */
 #view-question {
@@ -436,7 +395,10 @@ pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 ══════════════════════════════════════════════ */
 #theory-section {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--footer-h);
   z-index: 500;
   background: var(--bg);
   display: flex;
@@ -620,6 +582,37 @@ pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #4a545e; }
+
+/* ── Persistent footer ───────────────────────────────────────────────────── */
+#app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-h);
+  z-index: 600;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: .75rem;
+  color: var(--text3);
+}
+
+.footer-credit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #0a66c2;
+  font-weight: 600;
+  font-size: .75rem;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.footer-credit-link:hover { color: #1e85d4; }
+.footer-credit-link svg { width: 13px; height: 13px; flex-shrink: 0; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 700px) {
